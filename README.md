@@ -1,8 +1,44 @@
-# React + Vite
+# 🐾 Search Your Pokémon 🎮
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to **Search Your Pokémon**, a project built with **React** and **JavaScript** that uses the [PokéAPI](https://pokeapi.co/) to fetch Pokémon images! 📸✨
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Features
+- 🔎 Search for Pokémon by name.
+- 🖼️ Display official images of each Pokémon.
+- ⚡ Dynamic and responsive interface.
+
+---
+
+## 🚀 Technologies Used
+- ⚛️ **React** for building the user interface.
+- 📡 **PokéAPI** for fetching Pokémon data and images.
+- 🎨 **CSS and Sass** for styling and responsiveness.
+
+---
+
+## 🖥️ Preview
+Here’s a glimpse of what the application looks like:
+
+![Screenshot](https://via.placeholder.com/800x400?text=Project+Screenshot)
+
+---
+
+## 🧑‍💻 Author
+Made with ❤️ by [João Campos](https://github.com/your-username). Feel free to reach out!
+
+---
+
+## 📜 License
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🌈 Acknowledgments
+Special thanks to the team at [PokéAPI](https://pokeapi.co/) for making this project possible. 🎉
+
+---
+
+✨ **Have fun searching your Pokémon!** 🕹️
+
