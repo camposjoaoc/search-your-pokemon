@@ -1,18 +1,11 @@
 /* Global styles for the body */
 body {
-    /* Set the base font style */
-    font-family: "Roboto", sans-serif;
-
-    /* Apply consistent margin */
     margin: 20px 10vh;
-    /* 20px top/bottom, 10% of viewport width left/right */
-
-    /* Include padding and border in width/height calculations */
     box-sizing: border-box;
-
-    /* Set the full width of the body */
     width: 100%;
-    /* Center the body content horizontally */
     margin-left: auto;
     margin-right: auto;
+    background-image: url(../assets/img-app-background.jpg);
+    object-fit: cover;
+    background-size: cover; 
 }
