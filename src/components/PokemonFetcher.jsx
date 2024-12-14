@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import "../sass/PokemonFetcher.scss";
+import '../sass/PokemonFetcher.scss';
+import logoPokemon from '../assets/img-pokemon-logo.png';
+
+//Capitalize the first letter
+function capitalizeFirstLetter(val) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
 
 function PokemonFetcher() {
     // State to store the name of the Pokemon entered by the user
@@ -34,14 +40,14 @@ function PokemonFetcher() {
             // Loop through the statistics array and format them for display
             for (let position in pokemonStats) {
                 // Format the statistics for display
-                statistics = statistics.concat(`${pokemonStats[position].stat.name}: ${pokemonStats[position].base_stat} \n`);
+                statistics = statistics.concat(`${capitalizeFirstLetter(pokemonStats[position].stat.name)}: ${pokemonStats[position].base_stat}\n`);
             }
             // Update the state with the formatted statistics
             setPokemonStats(statistics);
 
         } catch (err) {
             console.error(err); // Log the error to the console
-            setError('Pokemon not found or an error occurred.'); // Update error state
+            setError('Pokemon not found or an error occurred. Try Again!'); // Update error state
             setPokemonSprite(null); // Reset the sprite URL
         }
     };
@@ -54,14 +60,17 @@ function PokemonFetcher() {
 
     return (
         <div className="grid-container">
-            <h1 className="main-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
+            <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite'/>
+            <h1 className="primary-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
 
-            {/* Form to accept user input for Pokemon name */}
-            <form onSubmit={handleSubmit}>
-                {/* // Update state with user input */}
-                <input type="text" placeholder="Enter Pokemon name" value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
-                <button type="submit" className="btn-search">Fetch Pokemon</button>
-            </form>
+            <div className='search-box'>
+                {/* Form to accept user input for Pokemon name */}
+                <form onSubmit={handleSubmit}>
+                    {/* // Update state with user input */}
+                    <input className="input-style" type="text" placeholder="Enter Pokémon name" value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
+                    <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
+                </form>
+            </div>
 
             {/* Display error message if any */}
             {error && <p className="p-error-msg">{error}</p>}
@@ -70,11 +79,13 @@ function PokemonFetcher() {
             {pokemonSprite && (
                 <div className="pokemon-container">
                     <div>
-                        <p>Pokémon name: {APIPokemonName}</p>
-                        <p>Statistics</p>
-                        <p className="teste"> {pokemonStats}</p>
+                        <p className="p-info">Pokémon name: {APIPokemonName}</p>
+                        <p className="p-info">Statistics</p>
+                        <p className="p-info"> {pokemonStats}</p>
                     </div>
-                    <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} className="img-container" />
+                    <div>
+                        <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} className="img-container" />
+                    </div>
                 </div>
             )}
         </div>
