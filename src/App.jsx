@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import 'normalize.css';
-import '../src/styles/App.scss';
+import '../src/sass/App.scss';
 import PokemonFetcher from "./components/PokemonFetcher";
 
 function App() {
