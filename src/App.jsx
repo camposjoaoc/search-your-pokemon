@@ -11,8 +11,6 @@ function App() {
                 <Routes>
                     <Route path="/" element={<PokemonFetcher />} />
                 </Routes>
-                {/* Footer component displayed on all pages */}
-                <Footer></Footer>
             </BrowserRouter>
         </>
     )
