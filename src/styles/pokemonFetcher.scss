@@ -1,0 +1,32 @@
+.grid-container{
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* 3 columns in the grid */
+    grid-template-rows: repeat(3); 
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    margin: 20px auto; /* Centers the grid container horizontally */
+    width: 80%;
+    max-width: 1476px;
+    justify-items: center;
+}
+
+.pokemon-container {
+    display: flex;
+    justify-content: space-between;
+    max-height: 60vh;
+    overflow: hidden; /* Garante que as imagens maiores sejam cortadas */
+}
+
+.img-container {
+    width: auto;
+    height: 30vh;
+    object-fit: cover; 
+}
+
+.p-error-msg {
+    color: red;
+}
+.teste{
+    white-space: pre-wrap;
+}
