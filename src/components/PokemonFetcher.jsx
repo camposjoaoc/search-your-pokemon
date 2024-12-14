@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import "../styles/PokemonFetcher.scss";
+import "../sass/PokemonFetcher.scss";
 
 function PokemonFetcher() {
     // State to store the name of the Pokemon entered by the user
