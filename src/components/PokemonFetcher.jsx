@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../sass/PokemonFetcher.scss';
 import logoPokemon from '../assets/img-pokemon-logo.png';
+import myAudio from '../assets/audio/pokemon-found.mp3';
 
 //Capitalize the first letter
 function capitalizeFirstLetter(val) {
@@ -59,6 +60,16 @@ function PokemonFetcher() {
         e.preventDefault(); // Prevent page reload on form submission
         fetchPokemon(); // Call the fetch function
     };
+
+    // Function to play the audio when the sprite is loaded
+    useEffect(() => {
+        if (pokemonSprite) {
+            const audioPlayer = new Audio(myAudio); 
+            audioPlayer.play().catch((error) => {
+                console.error('Error playing audio:', error);
+            });
+        }
+    }, [pokemonSprite]);
 
     return (
         <div className="grid-container">
