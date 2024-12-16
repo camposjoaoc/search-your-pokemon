@@ -1,36 +1,20 @@
+@use 'variables';
+
 /* Footer content layout and styling */
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Define 3 colunas de tamanho igual */
-    gap: 1em; /* Espaçamento entre os itens */
-    text-align: center; /* Centraliza o texto dentro de cada coluna */
-    padding: 1em 0; /* Espaço ao redor do conteúdo do footer */
+    grid-template-columns: repeat(1, 1fr); 
+    text-align: center; 
+    padding: 1em 0; 
     margin: 20px 10vh;
-    
 }
 
 /* Footer text styling */
 .footer-content p {
     margin: 10px 0; /* Space around text */
-    font-size: 1rem;
-
-}
-
-/* Social icons container layout */
-.social-icons {
-    gap: 15px; /* Space between social icons */
-    margin-top: 0.5em; /* Space above the icons */
-    font-size: 1.5rem; /* Icon size */
-}
-
-/* Icon links styling */
-.social-icons a {
-
-    font-size: 1em;
-    transition: color 0.3s; /* Smooth hover effect */
-}
-
-/* Hover effect for social icons */
-.social-icons a:hover {
- /* Change color on hover */
+    font-size: 0.7rem;
+    font-style: bold;
+    line-height: 10px;
+    font-family: variables.$fourth-font;
+    color: variables.$primary-color;
 }

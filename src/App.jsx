@@ -12,6 +12,7 @@ function App() {
                     <Route path="/" element={<PokemonFetcher />} />
                 </Routes>
             </BrowserRouter>
+            <Footer /> {/* Footer component */}
         </>
     )
 }
