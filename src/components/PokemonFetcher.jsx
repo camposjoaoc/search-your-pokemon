@@ -31,16 +31,18 @@ function PokemonFetcher() {
 
             const data = await response.json();
             setPokemonSprite(data.sprites.other.dream_world.front_default); // Set the sprite URL
-            setAPIPokemonName(data.name); // Set the fetched Pokémon's name
+            setAPIPokemonName(capitalizeFirstLetter(data.name)); // Set the fetched Pokémon's name
+            setPokemonName(""); // Clear input
 
             // Fetch and display the Pokémon's statistics
             let pokemonStats = data.stats;
             let statistics = "";
+            const emoji = "⚡";
 
             // Loop through the statistics array and format them for display
             for (let position in pokemonStats) {
                 // Format the statistics for display
-                statistics = statistics.concat(`${capitalizeFirstLetter(pokemonStats[position].stat.name)}: ${pokemonStats[position].base_stat}\n`);
+                statistics = statistics.concat(`${emoji}${capitalizeFirstLetter(pokemonStats[position].stat.name)}: ${pokemonStats[position].base_stat}\n`);
             }
             // Update the state with the formatted statistics
             setPokemonStats(statistics);
@@ -60,7 +62,7 @@ function PokemonFetcher() {
 
     return (
         <div className="grid-container">
-            <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite'/>
+            <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite' />
             <h1 className="primary-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
 
             <div className='search-box'>
@@ -70,8 +72,11 @@ function PokemonFetcher() {
                     <input className="input-style" type="text" placeholder="Enter Pokémon name" value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
                     <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
                 </form>
-            </div>
 
+            </div>
+            <div>
+                <h4 className="help-info">Need Help? Look this <a href="https://www.pokemon.com/us/pokedex" target="_blank" rel="noopener noreferrer">list</a> of Pokémons!</h4>
+            </div>
             {/* Display error message if any */}
             {error && <p className="p-error-msg">{error}</p>}
 
@@ -79,12 +84,12 @@ function PokemonFetcher() {
             {pokemonSprite && (
                 <div className="pokemon-container">
                     <div>
-                        <p className="p-info">Pokémon name: {APIPokemonName}</p>
-                        <p className="p-info">Statistics</p>
+                        <p className="p-info">Pokémon: {APIPokemonName}</p>
+                        <p className="p-info">--Statistics--</p>
                         <p className="p-info"> {pokemonStats}</p>
                     </div>
-                    <div>
-                        <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} className="img-container" />
+                    <div className="img-container">
+                        <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} />
                     </div>
                 </div>
             )}
