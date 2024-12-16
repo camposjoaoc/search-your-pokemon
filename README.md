@@ -21,12 +21,12 @@ Welcome to **Search Your Pokémon**, a project built with **React** and **JavaSc
 ## 🖥️ Preview
 Here’s a glimpse of what the application looks like:
 
-![Screenshot](https://via.placeholder.com/800x400?text=Project+Screenshot)
+![Screenshot](./src/assets/splash-app.png)
 
 ---
 
 ## 🧑‍💻 Author
-Made with ❤️ by [João Campos](https://github.com/your-username). Feel free to reach out!
+Made with ❤️ by [João Campos](https://github.com/camposjoaoc). Feel free to reach out!
 
 ---
 
