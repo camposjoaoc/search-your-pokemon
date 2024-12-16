@@ -80,7 +80,7 @@ function PokemonFetcher() {
                 {/* Form to accept user input for Pokemon name */}
                 <form onSubmit={handleSubmit}>
                     {/* // Update state with user input */}
-                    <input className="input-style" type="text" placeholder="Enter Pokémon name" value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
+                    <input className="input-style" type="text" placeholder="Enter Pokémon name: Pikachu, Charizard, Snorlax, Blastoise..." value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
                     <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
                 </form>
 
