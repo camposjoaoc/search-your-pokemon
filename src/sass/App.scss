@@ -1,4 +1,5 @@
 /* Global styles for the body */
+
 body {
     margin: 20px 10vh;
     box-sizing: border-box;
@@ -7,5 +8,31 @@ body {
     margin-right: auto;
     background-image: url(../assets/img-app-background.jpg);
     object-fit: cover;
-    background-size: cover; 
+    background-size: cover;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Tablet styles: medium screens (768px to 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    body {
+        margin: 10px;
+        max-width: calc(100% - 20px); 
+        background-size: auto;
+        background-position: center;
+    }
+}
+
+/* Mobile styles: small screens (max-width: 767px) */
+@media screen and (max-width: 767px) {
+    body {
+        margin: 10px; 
+        max-width: calc(100% - 20px); 
+        background-size: auto;
+        background-position: center;
+    }
 }

@@ -1,20 +1,45 @@
-@use 'variables';
+@use "variables";
 
 /* Footer content layout and styling */
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(1, 1fr); 
-    text-align: center; 
-    padding: 1em 0; 
-    margin: 20px 10vh;
+    grid-template-columns: repeat(1, 1fr);
+    text-align: center;
+    margin: 15px 10vh;
 }
 
 /* Footer text styling */
 .footer-content p {
     margin: 10px 0; /* Space around text */
-    font-size: 0.7rem;
+    font-size: 1rem;
     font-style: bold;
-    line-height: 10px;
+    line-height: 15px;
     font-family: variables.$fourth-font;
     color: variables.$primary-color;
+}
+
+/* Tablet styles: medium screens (768px to 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .footer-content {
+        margin: 0;
+        padding: 0;
+    }
+    .footer-content p {
+        font-size: 0.9rem;
+        line-height: 18px;
+        margin: 7px 0;
+    }
+}
+
+/* Mobile styles: small screens (max-width: 767px) */
+@media screen and (max-width: 767px) {
+    .footer-content {
+        margin: 0;
+        padding: 0;
+    }
+    .footer-content p {
+        font-size: 0.8rem;
+        line-height: 15px;
+        margin: 5px 0;
+    }
 }
