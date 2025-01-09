@@ -64,7 +64,7 @@ function PokemonFetcher() {
     // Function to play the audio when the sprite is loaded
     useEffect(() => {
         if (pokemonSprite) {
-            const audioPlayer = new Audio(myAudio); 
+            const audioPlayer = new Audio(myAudio);
             audioPlayer.play().catch((error) => {
                 console.error('Error playing audio:', error);
             });
@@ -72,38 +72,40 @@ function PokemonFetcher() {
     }, [pokemonSprite]);
 
     return (
-        <div className="grid-container">
-            <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite' />
-            <h1 className="primary-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
+        <div className="container">
+            <div className="grid-container">
+                <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite' />
+                <h1 className="primary-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
 
-            <div className='search-box'>
-                {/* Form to accept user input for Pokemon name */}
-                <form onSubmit={handleSubmit}>
-                    {/* // Update state with user input */}
-                    <input className="input-style" type="text" placeholder="Enter Pokémon name: Pikachu, Charizard, Snorlax, Blastoise..." value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
-                    <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
-                </form>
+                <div className='search-box'>
+                    {/* Form to accept user input for Pokemon name */}
+                    <form onSubmit={handleSubmit}>
+                        {/* // Update state with user input */}
+                        <input className="input-style" type="text" placeholder="Enter Pokémon name: Pikachu, Charizard, Snorlax, Blastoise..." value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
+                        <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
+                    </form>
 
-            </div>
-            <div>
-                <h4 className="help-info">Need Help? Look this <a href="https://www.pokemon.com/us/pokedex" target="_blank" rel="noopener noreferrer">list</a> of Pokémons!</h4>
-            </div>
-            {/* Display error message if any */}
-            {error && <p className="p-error-msg">{error}</p>}
-
-            {/* Display the fetched Pokemon sprite */}
-            {pokemonSprite && (
-                <div className="pokemon-container">
-                    <div>
-                        <p className="p-info">Pokémon: {APIPokemonName}</p>
-                        <p className="p-info">--Statistics--</p>
-                        <p className="p-info"> {pokemonStats}</p>
-                    </div>
-                    <div className="img-container">
-                        <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} />
-                    </div>
                 </div>
-            )}
+                <div>
+                    <h4 className="help-info">Need Help? Look this <a href="https://www.pokemon.com/us/pokedex" target="_blank" rel="noopener noreferrer">list</a> of Pokémons!</h4>
+                </div>
+                {/* Display error message if any */}
+                {error && <p className="p-error-msg">{error}</p>}
+
+                {/* Display the fetched Pokemon sprite */}
+                {pokemonSprite && (
+                    <div className="pokemon-container">
+                        <div>
+                            <p className="p-info">{APIPokemonName}</p>
+                            <p className="p-info">--Statistics--</p>
+                            <p className="p-info"> {pokemonStats}</p>
+                        </div>
+                        <div className="img-container">
+                            <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} />
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
