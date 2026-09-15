@@ -1,3 +1,6 @@
+@use "variables";
+@use "types";
+
 /* Global styles for the body */
 
 body {
@@ -15,6 +18,11 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+
+/* Content for screen readers only */
+.visually-hidden {
+    @include variables.visually-hidden;
 }
 
 /* Tablet styles: medium screens (768px to 1024px) */

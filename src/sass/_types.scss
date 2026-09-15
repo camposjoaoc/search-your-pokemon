@@ -1,0 +1,52 @@
+@use "sass:color";
+@use "variables";
+
+/* Pokémon type colors and badges, shared by the card and the home widgets */
+
+/* --type-color is overridden by the type-* class of an element's main type */
+:root {
+    --type-color: #{variables.$primary-border-color};
+}
+
+.badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.type-badge {
+    padding: 0.3em 0.9em;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    background-color: var(--type-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.type-badge-small {
+    padding: 0.2em 0.7em;
+    font-size: 0.75em;
+}
+
+.type-multiplier {
+    font-weight: 900;
+}
+
+/* Generate a class per type, with readable text on light and dark type colors */
+@each $type, $type-color in variables.$type-colors {
+    .type-#{$type} {
+        --type-color: #{$type-color};
+    }
+
+    .type-badge.type-#{$type} {
+        @if color.channel($type-color, "lightness", $space: oklch) > 65% {
+            color: variables.$secondary-color;
+        } @else {
+            color: variables.$primary-color;
+        }
+    }
+}

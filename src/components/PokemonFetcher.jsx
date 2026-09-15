@@ -1,117 +1,190 @@
-import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import '../sass/pokemonFetcher.scss';
 import logoPokemon from '../assets/img-pokemon-logo.png';
-import myAudio from '../assets/audio/pokemon-found.mp3';
+import PokemonCard from './PokemonCard';
+import PokemonOfTheDay from './PokemonOfTheDay';
+import SearchBox from './SearchBox';
+import WhosThatPokemon from './WhosThatPokemon';
+import { API_URL, fetchJson, readCache, writeCache } from '../utils/api';
+import { playFoundAudio } from '../utils/audio';
+import { FIRST_ALTERNATE_FORM_ID, buildPokemon, getIdFromUrl, normalizeSearchQuery } from '../utils/pokemon';
 
-//Capitalize the first letter
-function capitalizeFirstLetter(val) {
-    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
-}
+// Used for the random button if the Pokémon list couldn't be loaded
+const FALLBACK_SPECIES_COUNT = 1025;
 
-// Play the "Pokémon found" sound
-function playFoundAudio() {
-    const audioPlayer = new Audio(myAudio);
-    audioPlayer.play().catch((error) => {
-        console.error('Error playing audio:', error);
-    });
+// The list of names rarely changes, so it's cached for a week
+const POKEMON_LIST_CACHE_KEY = 'pokemonList';
+const POKEMON_LIST_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+// Spinning Pokéball shown while a search is in progress
+function LoadingStatus() {
+    return (
+        <div className="loading-status">
+            <span className="pokeball-spinner" aria-hidden="true" />
+            Searching...
+        </div>
+    );
 }
 
 function PokemonFetcher() {
-    // State to store the name of the Pokemon entered by the user
-    const [pokemonName, setPokemonName] = useState('');
-    // State to store the sprite (image) URL of the fetched Pokemon
-    const [pokemonSprite, setPokemonSprite] = useState(null);
+    // State to store the fetched Pokémon shown on the card
+    const [pokemon, setPokemon] = useState(null);
     // State to store any error messages
     const [error, setError] = useState(null);
-    // State to store the fetched Pokémon's name
-    const [APIPokemonName, setAPIPokemonName] = useState('');
-    // State to store the fetched Pokémon's status
-    const [pokemonStats, setPokemonStats] = useState('');
+    // State to show that a search is in progress
+    const [isLoading, setIsLoading] = useState(false);
+    // State to store every Pokémon name and id, used by the autocomplete, the random button and the quiz
+    const [pokemonList, setPokemonList] = useState([]);
+    // Id of the latest search, so slower older responses don't overwrite newer ones
+    const latestRequestId = useRef(0);
+    // Name (as in the URL) of the Pokémon on screen, so the URL effect doesn't fetch it again
+    const loadedPokemonName = useRef(null);
 
-    // Function to fetch Pokemon data from the API
-    const fetchPokemon = async (name) => {
+    // The Pokémon in the URL (?pokemon=snorlax), so searches can be shared and navigated with back/forward
+    const [searchParams, setSearchParams] = useSearchParams();
+    const pokemonParam = searchParams.get('pokemon');
+
+    // Function to fetch Pokemon data from the API, by name or Pokédex number. Resolves to true when it's shown
+    const fetchPokemon = async (nameOrId, { fromUrl = false } = {}) => {
+        const requestId = ++latestRequestId.current;
+        setError(null); // Reset error state before fetching
+        setIsLoading(true);
+
         try {
-            setError(null); // Reset error state before fetching
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(name)}`);
+            const data = await fetchJson(`${API_URL}/pokemon/${encodeURIComponent(nameOrId)}`);
 
-            if (!response.ok) {
-                throw new Error('Could not fetch resource'); // Handle non-successful responses
-            }
+            // Extra details are optional: the card still shows if any of these requests fail
+            const [species, typeDetails] = await Promise.all([
+                fetchJson(data.species.url).catch(() => null),
+                Promise.all(data.types.map(({ type }) => fetchJson(type.url))).catch(() => null),
+            ]);
+            const evolutionChain = species?.evolution_chain
+                ? await fetchJson(species.evolution_chain.url).catch(() => null)
+                : null;
 
-            const data = await response.json();
-            // Not every Pokémon (e.g. Mega forms) has a Dream World sprite, so fall back to other artwork
-            const sprite =
-                data.sprites.other.dream_world.front_default ??
-                data.sprites.other['official-artwork'].front_default ??
-                data.sprites.front_default;
+            if (requestId !== latestRequestId.current) return false; // A newer search has started
 
-            if (!sprite) {
+            const fetchedPokemon = buildPokemon(data, species, typeDetails, evolutionChain);
+            if (!fetchedPokemon.sprite) {
                 throw new Error('No sprite available');
             }
 
-            setPokemonSprite(sprite); // Set the sprite URL
-            setAPIPokemonName(capitalizeFirstLetter(data.name)); // Set the fetched Pokémon's name
-            setPokemonName(""); // Clear input
-
-            // Format the Pokémon's statistics for display
-            const emoji = "⚡";
-            const statistics = data.stats
-                .map(({ stat, base_stat }) => `${emoji}${capitalizeFirstLetter(stat.name)}: ${base_stat}\n`)
-                .join('');
-            // Update the state with the formatted statistics
-            setPokemonStats(statistics);
-
-            playFoundAudio(); // Play on every successful search, even when repeating the same Pokémon
+            setPokemon(fetchedPokemon);
+            loadedPokemonName.current = data.name;
+            // New searches add a history entry; links opened by number (?pokemon=25) are rewritten to the name
+            if (pokemonParam !== data.name) {
+                setSearchParams({ pokemon: data.name }, { replace: fromUrl });
+            }
+            playFoundAudio(fetchedPokemon.cry); // Play on every successful search, even when repeating the same Pokémon
+            return true;
 
         } catch (err) {
+            if (requestId !== latestRequestId.current) return false; // A newer search has started
             console.error(err); // Log the error to the console
             setError('Pokemon not found or an error occurred. Try Again!'); // Update error state
-            setPokemonSprite(null); // Reset the sprite URL
+            setPokemon(null); // Hide the previous Pokémon
+            return false;
+        } finally {
+            if (requestId === latestRequestId.current) {
+                setIsLoading(false);
+            }
         }
     };
 
-    // Function to handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent page reload on form submission
-        const name = pokemonName.trim().toLowerCase();
-        if (!name) return; // Ignore empty searches
-        fetchPokemon(name); // Call the fetch function
+    // Load every Pokémon name once (or from the cache); if it fails, searching still works without suggestions
+    useEffect(() => {
+        const cachedList = readCache(POKEMON_LIST_CACHE_KEY, POKEMON_LIST_MAX_AGE);
+        if (cachedList) {
+            setPokemonList(cachedList);
+            return;
+        }
+
+        fetchJson(`${API_URL}/pokemon?limit=100000`)
+            .then(({ results }) => {
+                const list = results.map(({ name, url }) => ({ name, id: getIdFromUrl(url) }));
+                setPokemonList(list);
+                writeCache(POKEMON_LIST_CACHE_KEY, list);
+            })
+            .catch((err) => console.error('Could not load the Pokémon list:', err));
+    }, []);
+
+    // Show the Pokémon from the URL when the page opens or the user navigates back/forward
+    useEffect(() => {
+        if (!pokemonParam) {
+            latestRequestId.current++; // Ignore any search still in progress
+            loadedPokemonName.current = null;
+            setPokemon(null);
+            setError(null);
+            setIsLoading(false);
+            return;
+        }
+
+        if (pokemonParam !== loadedPokemonName.current) {
+            fetchPokemon(normalizeSearchQuery(pokemonParam), { fromUrl: true });
+        }
+        // Only react to URL changes; fetchPokemon is recreated on every render
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pokemonParam]);
+
+    // Function to handle a search from the search box (typed text or a picked suggestion)
+    const handleSearch = (query) => {
+        const nameOrNumber = normalizeSearchQuery(query);
+        if (!nameOrNumber) return Promise.resolve(false); // Ignore empty searches
+        return fetchPokemon(nameOrNumber); // Call the fetch function
+    };
+
+    // Function to show a random Pokémon (default forms only)
+    const handleRandom = () => {
+        const species = pokemonList.filter(({ id }) => id < FIRST_ALTERNATE_FORM_ID);
+        const randomPokemon = species.length > 0
+            ? species[Math.floor(Math.random() * species.length)].name
+            : Math.floor(Math.random() * FALLBACK_SPECIES_COUNT) + 1;
+        return fetchPokemon(randomPokemon);
     };
 
     return (
         <div className="container">
             <div className="grid-container">
-                <img src={logoPokemon} alt="Pokemon Logo" className='img-logo animate__animated animate__pulse animate__infinite' />
+                {/* The logo goes back to the home page and its widgets */}
+                <Link to="/" className="logo-link" aria-label="Go to home page">
+                    <img src={logoPokemon} alt="" className='img-logo animate__animated animate__pulse animate__infinite' />
+                </Link>
                 <h1 className="primary-title">Hello, Trainer! Ready to Find a Pokémon?</h1>
 
-                <div className='search-box'>
-                    {/* Form to accept user input for Pokemon name */}
-                    <form onSubmit={handleSubmit}>
-                        {/* // Update state with user input */}
-                        <input className="input-style" type="text" placeholder="Enter Pokémon name: Pikachu, Charizard, Snorlax, Blastoise..." value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
-                        <button type="submit" className="btn-search">FIND POKÉMON <FontAwesomeIcon icon={faMagnifyingGlass} /> </button>
-                    </form>
+                <SearchBox
+                    pokemonList={pokemonList}
+                    onSearch={handleSearch}
+                    onRandom={handleRandom}
+                    isLoading={isLoading}
+                />
 
-                </div>
                 <div>
                     <h4 className="help-info">Need Help? Look this <a href="https://www.pokemon.com/us/pokedex" target="_blank" rel="noopener noreferrer">list</a> of Pokémons!</h4>
                 </div>
-                {/* Display error message if any */}
-                {error && <p className="p-error-msg">{error}</p>}
 
-                {/* Display the fetched Pokemon sprite */}
-                {pokemonSprite && (
-                    <div className="pokemon-container">
-                        <div>
-                            <p className="p-info">{APIPokemonName}</p>
-                            <p className="p-info">--Statistics--</p>
-                            <p className="p-info"> {pokemonStats}</p>
-                        </div>
-                        <div className="img-container">
-                            <img src={pokemonSprite} alt={`Sprite of ${APIPokemonName}`} />
-                        </div>
+                {/* Announce loading and errors to screen readers */}
+                <div className="status-area" role="status" aria-live="polite">
+                    {isLoading && !pokemon && <LoadingStatus />}
+                    {error && <p className="p-error-msg">{error}</p>}
+                </div>
+
+                {/* Home widgets are hidden (not unmounted) while a Pokémon is shown, so the quiz keeps its streak */}
+                <div className="home-widgets" hidden={Boolean(pokemon)}>
+                    <PokemonOfTheDay onSelectPokemon={fetchPokemon} />
+                    <WhosThatPokemon pokemonList={pokemonList} onSelectPokemon={fetchPokemon} />
+                </div>
+
+                {/* Display the fetched Pokemon card, dimmed while the next one loads (e.g. clicking an evolution) */}
+                {pokemon && (
+                    <div className={`card-wrapper ${isLoading ? 'is-loading' : ''}`} aria-busy={isLoading}>
+                        {/* The key resets the shiny toggle and replays the entrance animation */}
+                        <PokemonCard key={pokemon.id} pokemon={pokemon} onSelectPokemon={fetchPokemon} />
+                        {isLoading && (
+                            <div className="card-loading-overlay">
+                                <LoadingStatus />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
