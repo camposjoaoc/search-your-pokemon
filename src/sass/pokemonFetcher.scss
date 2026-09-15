@@ -5,8 +5,8 @@
 }
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(1, 1fr); /* 3 columns in the grid */
-    grid-template-rows: repeat(4, auto); /* 3 rows in the grid */
+    grid-template-columns: repeat(1, 1fr); /* Single column in the grid */
+    grid-template-rows: repeat(4, auto); /* 4 rows in the grid */
     gap: 10px;
     padding: 20px;
     box-sizing: border-box;
@@ -69,11 +69,11 @@
     display: flex;
     white-space: pre-wrap;
 
-    &.help-info a:hover {
+    a:hover {
         color: variables.$quaternary-color;
     }
 
-    &.help-info a:link {
+    a:link {
         text-decoration: none;
         color: variables.$quaternary-color;
     }

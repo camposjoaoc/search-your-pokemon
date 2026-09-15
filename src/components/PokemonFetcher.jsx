@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
-import '../sass/PokemonFetcher.scss';
+import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import '../sass/pokemonFetcher.scss';
 import logoPokemon from '../assets/img-pokemon-logo.png';
 import myAudio from '../assets/audio/pokemon-found.mp3';
 
 //Capitalize the first letter
 function capitalizeFirstLetter(val) {
     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+
+// Play the "Pokémon found" sound
+function playFoundAudio() {
+    const audioPlayer = new Audio(myAudio);
+    audioPlayer.play().catch((error) => {
+        console.error('Error playing audio:', error);
+    });
 }
 
 function PokemonFetcher() {
@@ -21,32 +31,39 @@ function PokemonFetcher() {
     const [pokemonStats, setPokemonStats] = useState('');
 
     // Function to fetch Pokemon data from the API
-    const fetchPokemon = async () => {
+    const fetchPokemon = async (name) => {
         try {
             setError(null); // Reset error state before fetching
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(name)}`);
 
             if (!response.ok) {
                 throw new Error('Could not fetch resource'); // Handle non-successful responses
             }
 
             const data = await response.json();
-            setPokemonSprite(data.sprites.other.dream_world.front_default); // Set the sprite URL
+            // Not every Pokémon (e.g. Mega forms) has a Dream World sprite, so fall back to other artwork
+            const sprite =
+                data.sprites.other.dream_world.front_default ??
+                data.sprites.other['official-artwork'].front_default ??
+                data.sprites.front_default;
+
+            if (!sprite) {
+                throw new Error('No sprite available');
+            }
+
+            setPokemonSprite(sprite); // Set the sprite URL
             setAPIPokemonName(capitalizeFirstLetter(data.name)); // Set the fetched Pokémon's name
             setPokemonName(""); // Clear input
 
-            // Fetch and display the Pokémon's statistics
-            let pokemonStats = data.stats;
-            let statistics = "";
+            // Format the Pokémon's statistics for display
             const emoji = "⚡";
-
-            // Loop through the statistics array and format them for display
-            for (let position in pokemonStats) {
-                // Format the statistics for display
-                statistics = statistics.concat(`${emoji}${capitalizeFirstLetter(pokemonStats[position].stat.name)}: ${pokemonStats[position].base_stat}\n`);
-            }
+            const statistics = data.stats
+                .map(({ stat, base_stat }) => `${emoji}${capitalizeFirstLetter(stat.name)}: ${base_stat}\n`)
+                .join('');
             // Update the state with the formatted statistics
             setPokemonStats(statistics);
+
+            playFoundAudio(); // Play on every successful search, even when repeating the same Pokémon
 
         } catch (err) {
             console.error(err); // Log the error to the console
@@ -58,18 +75,10 @@ function PokemonFetcher() {
     // Function to handle form submission
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent page reload on form submission
-        fetchPokemon(); // Call the fetch function
+        const name = pokemonName.trim().toLowerCase();
+        if (!name) return; // Ignore empty searches
+        fetchPokemon(name); // Call the fetch function
     };
-
-    // Function to play the audio when the sprite is loaded
-    useEffect(() => {
-        if (pokemonSprite) {
-            const audioPlayer = new Audio(myAudio);
-            audioPlayer.play().catch((error) => {
-                console.error('Error playing audio:', error);
-            });
-        }
-    }, [pokemonSprite]);
 
     return (
         <div className="container">
@@ -82,7 +91,7 @@ function PokemonFetcher() {
                     <form onSubmit={handleSubmit}>
                         {/* // Update state with user input */}
                         <input className="input-style" type="text" placeholder="Enter Pokémon name: Pikachu, Charizard, Snorlax, Blastoise..." value={pokemonName} onChange={(e) => setPokemonName(e.target.value)} />
-                        <button type="submit" className="btn-search">FIND POKÉMON <i className="fas fa-search"></i> </button>
+                        <button type="submit" className="btn-search">FIND POKÉMON <FontAwesomeIcon icon={faMagnifyingGlass} /> </button>
                     </form>
 
                 </div>
@@ -101,7 +110,7 @@ function PokemonFetcher() {
                             <p className="p-info"> {pokemonStats}</p>
                         </div>
                         <div className="img-container">
-                            <img src={pokemonSprite} alt={`Sprite of ${pokemonName}`} />
+                            <img src={pokemonSprite} alt={`Sprite of ${APIPokemonName}`} />
                         </div>
                     </div>
                 )}
